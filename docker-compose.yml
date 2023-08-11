@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+
+  php-apache-environment:
+    container_name: php-apache
+    build:
+      dockerfile: ./.docker/php/Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./cert/ideas-induko.pem:/etc/ssl/certs/ideas-induko.pem
+      - ./cert/ideas-induko-key.pem:/etc/ssl/private/ideas-induko-key.pem
+      - ./public:/var/www/html
+    ports:
+      - 80:80
+      - 443:443
+
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    restart: always
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - '8080:80'
+    environment:
+        PMA_HOST: db
+    depends_on:
+        - db
+
